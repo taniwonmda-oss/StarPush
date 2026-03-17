@@ -1,0 +1,608 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:#0d1117;color:#e2e8f0;min-height:100vh;font-size:14px;}
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#1a2744 0%,#0d1117 70%);}
+.auth-wrap{width:360px;max-width:92vw;}
+.auth-logo-wrap{text-align:center;margin-bottom:2.5rem;}
+.auth-logo{font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px;}
+.auth-logo em{color:#60a5fa;font-style:normal;}
+.auth-logo-sub{font-size:13px;color:#4a5568;margin-top:4px;}
+.auth-card{background:#161b27;border:1px solid #1e2535;border-radius:18px;padding:2rem;}
+.auth-field{margin-bottom:1.1rem;}
+.auth-label{font-size:12px;color:#64748b;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;}
+.auth-input{width:100%;background:#0d1117;border:1px solid #1e2535;border-radius:10px;padding:11px 14px;color:#e2e8f0;font-size:14px;font-family:inherit;outline:none;transition:border 0.2s;}
+.auth-input:focus{border-color:#3b82f6;}
+.auth-btn{width:100%;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+.auth-btn:disabled{opacity:0.6;cursor:not-allowed;}
+.auth-err{font-size:13px;color:#f87171;margin-bottom:0.75rem;display:none;}
+#app{display:none;min-height:100vh;}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;height:56px;background:rgba(13,17,23,0.92);backdrop-filter:blur(12px);border-bottom:1px solid #1e2535;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;}
+.topbar-logo{font-size:17px;font-weight:800;color:#fff;}
+.topbar-logo em{color:#60a5fa;font-style:normal;}
+.topbar-actions{display:flex;align-items:center;gap:10px;}
+.topbar-btn{background:#161b27;border:1px solid #1e2535;border-radius:8px;padding:6px 12px;font-size:13px;color:#94a3b8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;}
+.topbar-btn:hover{background:#1e2535;color:#e2e8f0;}
+.main-content{padding-top:56px;min-height:100vh;padding-bottom:58px;}
+.view{display:none;}
+.view.active{display:block;}
+.user-home{padding:1.5rem 1.25rem;}
+.greeting-name{font-size:26px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+.greeting-name em{color:#60a5fa;font-style:normal;}
+.greeting-date{font-size:13px;color:#4b5563;margin-top:4px;}
+.greeting-motiv{font-size:13px;color:#60a5fa;margin-top:6px;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:1.5rem 0;}
+.stat-tile{background:#161b27;border:1px solid #1e2535;border-radius:14px;padding:1rem;text-align:center;}
+.stat-tile-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:18px;}
+.icon-fire{background:rgba(251,146,60,0.2);}
+.icon-bolt{background:rgba(96,165,250,0.2);}
+.icon-list{background:rgba(52,211,153,0.2);}
+.stat-tile-val{font-size:24px;font-weight:700;color:#fff;}
+.stat-tile-lbl{font-size:11px;color:#4b5563;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;}
+.section-hdr{font-size:12px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:1px;margin-bottom:1rem;}
+.company-card{background:#161b27;border:1px solid #1e2535;border-radius:16px;padding:1.25rem;margin-bottom:12px;}
+.cc-header{display:flex;align-items:center;gap:12px;margin-bottom:1.1rem;}
+.cc-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.cc-name{font-size:15px;font-weight:700;color:#fff;}
+.cc-cat{font-size:12px;color:#4b5563;margin-top:2px;}
+.cc-badge{margin-left:auto;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;flex-shrink:0;}
+.badge-done{background:rgba(52,211,153,0.15);color:#34d399;}
+.badge-prog{background:rgba(251,146,60,0.15);color:#fb923c;}
+.cc-goal-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;}
+.cc-goal-lbl{color:#4b5563;}
+.cc-goal-val{font-weight:600;color:#60a5fa;}
+.cc-bar{height:5px;background:#1e2535;border-radius:99px;overflow:hidden;margin-bottom:1rem;}
+.cc-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width 0.5s;}
+.cc-fill.done{background:linear-gradient(90deg,#10b981,#34d399);}
+.cc-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0;}
+.cc-upload-btn{background:#0d1117;border:1px solid #1e2535;border-radius:10px;padding:10px;font-size:13px;color:#94a3b8;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;}
+.cc-upload-btn:hover:not(:disabled){background:#1a2744;border-color:#3b82f6;color:#60a5fa;}
+.cc-upload-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.cc-ai-btn{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(59,130,246,0.12));border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:10px;font-size:13px;color:#a78bfa;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;}
+.cc-ai-btn:hover:not(:disabled){background:linear-gradient(135deg,rgba(139,92,246,0.22),rgba(59,130,246,0.22));border-color:rgba(139,92,246,0.5);}
+.cc-ai-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.ai-box{margin-top:12px;background:#0a0d17;border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:1rem;display:none;}
+.ai-box.open{display:block;}
+.ai-box-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ai-box-label{font-size:11px;font-weight:600;color:#a78bfa;text-transform:uppercase;letter-spacing:0.5px;}
+.ai-stars{color:#f5c542;font-size:15px;letter-spacing:2px;}
+.ai-text{font-size:14px;color:#c8d3e8;line-height:1.7;margin-bottom:12px;min-height:48px;}
+.ai-actions{display:flex;gap:8px;}
+.btn-copy{flex:1;background:#1d3461;border:1px solid #3b82f6;border-radius:8px;padding:8px;font-size:13px;color:#60a5fa;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;}
+.btn-copy:hover{background:#1e3f7a;}
+.btn-copy.copied{background:rgba(52,211,153,0.15);border-color:#34d399;color:#34d399;}
+.btn-regen{background:#161b27;border:1px solid #1e2535;border-radius:8px;padding:8px 12px;font-size:13px;color:#64748b;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all 0.2s;}
+.btn-regen:hover:not(:disabled){background:#1e2535;color:#e2e8f0;}
+.btn-regen:disabled{opacity:0.4;cursor:not-allowed;}
+.proofs-header{padding:1.25rem;border-bottom:1px solid #1e2535;}
+.filter-chips{display:flex;gap:8px;overflow-x:auto;}
+.chip{background:#161b27;border:1px solid #1e2535;border-radius:99px;padding:6px 14px;font-size:13px;color:#64748b;cursor:pointer;white-space:nowrap;}
+.chip.active{background:#1d3461;border-color:#3b82f6;color:#60a5fa;}
+.proofs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:1.25rem;}
+.proof-item{background:#161b27;border:1px solid #1e2535;border-radius:12px;overflow:hidden;}
+.proof-thumb{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+.proof-thumb-empty{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:#1a1f2e;font-size:28px;color:#374151;}
+.proof-info{padding:8px 10px;}
+.proof-biz{font-size:12px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.proof-date{font-size:11px;color:#4b5563;margin-top:2px;}
+.bottom-sheet{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,0.7);}
+.bottom-sheet.open{display:flex;}
+.sheet-inner{background:#161b27;border-radius:20px 20px 0 0;padding:1.5rem;max-height:80vh;overflow-y:auto;}
+.sheet-handle{width:40px;height:4px;background:#2d3748;border-radius:99px;margin:0 auto 1.25rem;}
+.sheet-title{font-size:18px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px;}
+.sheet-sub{font-size:13px;color:#4b5563;text-align:center;margin-bottom:1.25rem;}
+.date-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.date-input{background:#0d1117;border:1px solid #1e2535;border-radius:10px;padding:10px 12px;color:#e2e8f0;font-size:13px;font-family:inherit;width:100%;outline:none;}
+.review-row{background:#0d1117;border:1px solid #1e2535;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.review-row-avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;}
+.review-row-name{font-size:14px;font-weight:600;color:#e2e8f0;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.review-row-count{margin-left:auto;background:#1d3461;color:#60a5fa;font-size:12px;font-weight:600;padding:4px 12px;border-radius:99px;flex-shrink:0;}
+.sheet-proofs-btn{width:100%;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:8px;}
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.8);display:none;align-items:flex-end;}
+.modal-overlay.open{display:flex;}
+.upload-sheet{background:#161b27;border-radius:20px 20px 0 0;padding:1.5rem;width:100%;max-height:90vh;overflow-y:auto;}
+.upload-title{font-size:17px;font-weight:700;color:#fff;margin-bottom:4px;}
+.upload-sub{font-size:13px;color:#4b5563;margin-bottom:1.25rem;}
+.drop-zone{border:2px dashed #1e2535;border-radius:14px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:1rem;}
+.drop-zone:hover,.drop-zone.drag{border-color:#3b82f6;background:rgba(59,130,246,0.05);}
+.drop-icon{font-size:36px;margin-bottom:10px;}
+.drop-text{font-size:14px;color:#64748b;}
+.drop-hint{font-size:12px;color:#374151;margin-top:4px;}
+#file-input{display:none;}
+.preview-img{width:100%;border-radius:10px;margin-bottom:1rem;display:none;max-height:300px;object-fit:contain;}
+.modal-actions{display:grid;grid-template-columns:1fr 2fr;gap:10px;}
+.btn-cancel{background:transparent;border:1px solid #1e2535;border-radius:10px;padding:11px;font-size:14px;color:#64748b;cursor:pointer;font-family:inherit;}
+.btn-cancel:hover:not(:disabled){background:#1e2535;}
+.btn-cancel:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-submit{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-submit:disabled{background:#1e2535;color:#374151;cursor:not-allowed;}
+.file-err{font-size:12px;color:#f87171;margin-bottom:0.75rem;display:none;text-align:center;}
+.confirm-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;padding:1.5rem;}
+.confirm-overlay.open{display:flex;}
+.confirm-box{background:#161b27;border:1px solid #1e2535;border-radius:18px;padding:1.75rem;width:100%;max-width:320px;text-align:center;}
+.confirm-icon{font-size:36px;margin-bottom:12px;}
+.confirm-title{font-size:17px;font-weight:700;color:#fff;margin-bottom:8px;}
+.confirm-msg{font-size:13px;color:#64748b;margin-bottom:1.5rem;line-height:1.5;}
+.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.confirm-cancel{background:transparent;border:1px solid #1e2535;border-radius:10px;padding:11px;font-size:14px;color:#64748b;cursor:pointer;font-family:inherit;}
+.confirm-cancel:hover{background:#1e2535;}
+.confirm-ok{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}
+.admin-home{padding:1.5rem 1.25rem;}
+.admin-card{background:#161b27;border:1px solid #1e2535;border-radius:16px;padding:1.25rem;margin-bottom:10px;}
+.form-row{margin-bottom:1rem;}
+.form-label{font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;}
+.form-input{width:100%;background:#0d1117;border:1px solid #1e2535;border-radius:10px;padding:10px 12px;color:#e2e8f0;font-size:14px;font-family:inherit;outline:none;}
+.form-input:focus{border-color:#3b82f6;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-add{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-rm{background:transparent;border:1px solid #2d1f1f;border-radius:8px;padding:5px 10px;font-size:12px;color:#f87171;cursor:pointer;font-family:inherit;}
+.btn-rm:hover{background:#2d1f1f;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+.spinner-p{border-color:rgba(167,139,250,0.3);border-top-color:#a78bfa;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.ai-text{animation:fadeIn 0.3s ease;}
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:11px 22px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;display:none;white-space:nowrap;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:58px;background:rgba(13,17,23,0.95);backdrop-filter:blur(12px);border-top:1px solid #1e2535;display:flex;z-index:50;}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:#374151;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+.bnav-item:hover,.bnav-item.active{color:#60a5fa;}
+.bnav-icon{font-size:20px;line-height:1;}
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-wrap">
+    <div class="auth-logo-wrap">
+      <div class="auth-logo">⭐ Star<em>Push</em></div>
+      <div class="auth-logo-sub">Review management platform</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-err" id="auth-err">Wrong username or password.</div>
+      <div class="auth-field"><label class="auth-label">Username</label><input class="auth-input" id="inp-user" placeholder="Enter username" autocomplete="username"/></div>
+      <div class="auth-field"><label class="auth-label">Password</label><input class="auth-input" id="inp-pass" type="password" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"/></div>
+      <button class="auth-btn" id="login-btn" onclick="login()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">⭐ Star<em>Push</em></div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" id="my-reviews-btn" onclick="openReviewsSheet()" style="display:none">📊 My Reviews</button>
+      <button class="topbar-btn" onclick="logout()">↩ Sign out</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="view active" id="view-home">
+      <div class="user-home">
+        <div>
+          <div class="greeting-name">Hey, <em id="greet-name"></em> 👋</div>
+          <div class="greeting-date">📅 <span id="greet-date"></span></div>
+          <div class="greeting-motiv">✨ Let's crush it today! 💪</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-tile"><div class="stat-tile-icon icon-fire">🔥</div><div class="stat-tile-val" id="st-today">0</div><div class="stat-tile-lbl">Today</div></div>
+          <div class="stat-tile"><div class="stat-tile-icon icon-bolt">⚡</div><div class="stat-tile-val" id="st-week">0</div><div class="stat-tile-lbl">Week</div></div>
+          <div class="stat-tile" onclick="openReviewsSheet()" style="cursor:pointer"><div class="stat-tile-icon icon-list">📋</div><div class="stat-tile-val" style="font-size:15px;padding-top:6px">Summary</div><div class="stat-tile-lbl">Daily</div></div>
+        </div>
+        <div class="section-hdr">🎯 TODAY'S TASKS</div>
+        <div id="biz-list"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-proofs">
+      <div class="proofs-header"><div class="filter-chips"><div class="chip active">Last 14 Days</div><div class="chip">All</div></div></div>
+      <div class="proofs-grid" id="proofs-grid"></div>
+    </div>
+
+    <div class="view" id="view-admin">
+      <div class="admin-home">
+        <div class="greeting-name" style="margin-bottom:6px">Welcome, <em id="admin-greet" style="color:#60a5fa"></em> 👋</div>
+        <div class="greeting-date" style="margin-bottom:1.75rem">📅 <span id="admin-date"></span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2rem">
+          <div class="stat-tile"><div class="stat-tile-val" style="color:#fb923c" id="adm-total">0</div><div class="stat-tile-lbl">Total Reviews</div></div>
+          <div class="stat-tile"><div class="stat-tile-val" style="color:#34d399" id="adm-today">0</div><div class="stat-tile-lbl">Today</div></div>
+          <div class="stat-tile"><div class="stat-tile-val" style="color:#60a5fa" id="adm-biz">0</div><div class="stat-tile-lbl">Businesses</div></div>
+          <div class="stat-tile"><div class="stat-tile-val" style="color:#a78bfa" id="adm-users">0</div><div class="stat-tile-lbl">Reviewers</div></div>
+        </div>
+        <div class="section-hdr" style="margin-bottom:1rem">🏢 BUSINESSES</div>
+        <div id="admin-biz-list" style="margin-bottom:2rem"></div>
+        <div class="section-hdr" style="margin-bottom:1rem">➕ ADD BUSINESS</div>
+        <div class="admin-card" style="margin-bottom:2rem">
+          <div class="form-row"><label class="form-label">Business Name</label><input class="form-input" id="f-name" placeholder="e.g. Dave's Garage Door Repair"/></div>
+          <div class="form-grid">
+            <div class="form-row"><label class="form-label">Category</label><input class="form-input" id="f-cat" placeholder="Auto Repair"/></div>
+            <div class="form-row"><label class="form-label">Daily Goal</label><input class="form-input" id="f-goal" type="number" min="1" placeholder="5"/></div>
+          </div>
+          <div class="form-row"><label class="form-label">Emoji Icon</label><input class="form-input" id="f-icon" placeholder="🔧"/></div>
+          <button class="btn-add" id="add-biz-btn" onclick="addBiz()">Add Business</button>
+        </div>
+        <div class="section-hdr" style="margin-bottom:1rem">📸 ALL SUBMISSIONS</div>
+        <div id="admin-proofs-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav" id="bottom-nav" style="display:none">
+    <div class="bnav-item active" id="bnav-home" onclick="showView('home');setNav('home')"><div class="bnav-icon">🏠</div>Home</div>
+    <div class="bnav-item" id="bnav-proofs" onclick="showView('proofs');setNav('proofs')"><div class="bnav-icon">📸</div>Proofs</div>
+  </div>
+</div>
+
+<div class="bottom-sheet" id="reviews-sheet">
+  <div class="sheet-inner">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">📊 My Reviews</div>
+    <div class="sheet-sub">Pick a date range to see your stats</div>
+    <div class="date-row">
+      <input class="date-input" type="date" id="date-from"/>
+      <input class="date-input" type="date" id="date-to"/>
+    </div>
+    <div id="sheet-review-rows"></div>
+    <button class="sheet-proofs-btn" onclick="closeReviewsSheet();showView('proofs');setNav('proofs')">📸 View Proofs</button>
+    <button class="btn-cancel" style="width:100%;margin-top:8px" onclick="closeReviewsSheet()">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="upload-modal">
+  <div class="upload-sheet">
+    <div class="upload-title" id="upl-title">Submit Review Photo</div>
+    <div class="upload-sub">Upload a screenshot of the Google review on your phone</div>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+      <div class="drop-icon">📱</div>
+      <div class="drop-text">Tap or drag photo here</div>
+      <div class="drop-hint">JPG or PNG · Max 20MB</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])"/>
+    <div class="file-err" id="file-err"></div>
+    <img class="preview-img" id="preview-img"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="upload-cancel-btn" onclick="closeUpload()">Cancel</button>
+      <button class="btn-submit" id="submit-btn" disabled onclick="submitReview()">Submit ✅</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirm-icon">⚠️</div>
+    <div class="confirm-title" id="confirm-title">Are you sure?</div>
+    <div class="confirm-msg" id="confirm-msg">This cannot be undone.</div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-ok" id="confirm-ok-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ACCOUNTS={
+  '1':{p:'1',role:'user',name:'Dillon'},
+  '2':{p:'2',role:'admin',name:'Jackson'}
+};
+const BIZ_COLORS=['#1a2744','#1a3328','#2a1a2a','#1a2535','#251a10','#1a1a2a'];
+const MAX_FILE=20*1024*1024;
+let S={user:null,businesses:[
+  {id:1,name:"Dave's Garage Door Repair",cat:'Garage Doors',goal:5,icon:'🚪',color:BIZ_COLORS[0]},
+  {id:2,name:'Infinity Mobile Locksmith',cat:'Locksmith',goal:5,icon:'🔐',color:BIZ_COLORS[1]},
+  {id:3,name:'Bella Nails & Spa',cat:'Beauty',goal:4,icon:'💅',color:BIZ_COLORS[2]}
+],reviews:[],pendingBiz:null,pendingImg:null,confirmCb:null};
+
+function todayStr(){return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});}
+function todayKey(){return new Date().toDateString();}
+function weekStart(){const d=new Date();d.setDate(d.getDate()-d.getDay());return d;}
+
+function login(){
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div>Signing in...';
+  document.getElementById('auth-err').style.display='none';
+  setTimeout(()=>{
+    const u=document.getElementById('inp-user').value.trim();
+    const p=document.getElementById('inp-pass').value;
+    const acct=ACCOUNTS[u];
+    if(acct&&acct.p===p){
+      S.user={username:u,...acct};
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      setupApp();render();
+    } else {
+      document.getElementById('auth-err').style.display='block';
+      btn.disabled=false;btn.innerHTML='Sign In';
+    }
+  },600);
+}
+function logout(){
+  S.user=null;
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('inp-user').value='';
+  document.getElementById('inp-pass').value='';
+  document.getElementById('login-btn').innerHTML='Sign In';
+  document.getElementById('login-btn').disabled=false;
+}
+function setupApp(){
+  const isAdmin=S.user.role==='admin';
+  document.getElementById('bottom-nav').style.display=isAdmin?'none':'flex';
+  document.getElementById('my-reviews-btn').style.display=isAdmin?'none':'block';
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(isAdmin?'view-admin':'view-home').classList.add('active');
+  const today=new Date();const ago=new Date(today);ago.setDate(ago.getDate()-14);
+  document.getElementById('date-to').value=today.toISOString().split('T')[0];
+  document.getElementById('date-from').value=ago.toISOString().split('T')[0];
+}
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(name==='proofs')renderProofs();
+  else if(name==='home')renderHome();
+  else if(name==='admin')renderAdmin();
+}
+function setNav(name){
+  document.querySelectorAll('.bnav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('bnav-'+name);if(el)el.classList.add('active');
+}
+function render(){renderHome();renderAdmin();}
+
+function renderHome(){
+  if(!S.user||S.user.role==='admin')return;
+  document.getElementById('greet-name').textContent=S.user.name;
+  document.getElementById('greet-date').textContent=todayStr();
+  const myToday=S.reviews.filter(r=>r.user===S.user.username&&r.date===todayKey()).length;
+  const ws=weekStart();
+  const myWeek=S.reviews.filter(r=>r.user===S.user.username&&new Date(r.date)>=ws).length;
+  document.getElementById('st-today').textContent=myToday;
+  document.getElementById('st-week').textContent=myWeek;
+  const list=document.getElementById('biz-list');
+  if(!S.businesses.length){
+    list.innerHTML='<div style="background:#161b27;border:1px solid #1e2535;border-radius:14px;padding:3rem 1.5rem;text-align:center;color:#374151"><div style="font-size:36px;margin-bottom:12px;opacity:0.4">🏢</div><div>No companies assigned yet.</div></div>';
+    return;
+  }
+  list.innerHTML=S.businesses.map(b=>{
+    const done=S.reviews.filter(r=>r.bizId===b.id&&r.user===S.user.username&&r.date===todayKey()).length;
+    const pct=Math.min(100,Math.round(done/b.goal*100));
+    const met=done>=b.goal;
+    return `<div class="company-card" id="card-${b.id}">
+      <div class="cc-header">
+        <div class="cc-avatar" style="background:${b.color}">${b.icon}</div>
+        <div style="min-width:0;flex:1"><div class="cc-name">${b.name}</div><div class="cc-cat">${b.cat}</div></div>
+        <span class="cc-badge ${met?'badge-done':'badge-prog'}">${met?'✅ Done!':done+'/'+b.goal}</span>
+      </div>
+      <div class="cc-goal-row"><span class="cc-goal-lbl">Daily goal</span><span class="cc-goal-val">${done} / ${b.goal} reviews</span></div>
+      <div class="cc-bar"><div class="cc-fill ${met?'done':''}" style="width:${pct}%"></div></div>
+      <div class="cc-btns">
+        <button class="cc-upload-btn" onclick="openUpload(${b.id})">📱 Submit Photo</button>
+        <button class="cc-ai-btn" id="ai-btn-${b.id}" onclick="toggleAiBox(${b.id},'${b.name.replace(/'/g,"\\'")}','${b.cat}')">✨ AI Review</button>
+      </div>
+      <div class="ai-box" id="ai-box-${b.id}">
+        <div class="ai-box-header">
+          <span class="ai-box-label">✨ AI-Generated Review</span>
+          <span class="ai-stars">★★★★★</span>
+        </div>
+        <div class="ai-text" id="ai-text-${b.id}">Tap "AI Review" to generate a review you can copy and paste to Google.</div>
+        <div class="ai-actions">
+          <button class="btn-copy" id="copy-btn-${b.id}" onclick="copyReview(${b.id})">📋 Copy Review</button>
+          <button class="btn-regen" id="regen-btn-${b.id}" onclick="generateReview(${b.id},'${b.name.replace(/'/g,"\\'")}','${b.cat}')">🔄 New</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderProofs(){
+  if(!S.user)return;
+  const mine=S.reviews.filter(r=>r.user===S.user.username).reverse();
+  const grid=document.getElementById('proofs-grid');
+  if(!mine.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#374151;padding:3rem"><div style="font-size:36px;margin-bottom:12px;opacity:0.4">📸</div><div>No proofs yet</div></div>';
+    return;
+  }
+  grid.innerHTML=mine.map(r=>{
+    const b=S.businesses.find(x=>x.id===r.bizId);
+    return `<div class="proof-item">${r.img?`<img src="${r.img}" class="proof-thumb"/>`:'<div class="proof-thumb-empty">📱</div>'}<div class="proof-info"><div class="proof-biz">${b?.icon||''} ${b?.name||'Business'}</div><div class="proof-date">${r.timeStr}</div></div></div>`;
+  }).join('');
+}
+
+function openReviewsSheet(){renderReviewsSheet();document.getElementById('reviews-sheet').classList.add('open');}
+function closeReviewsSheet(){document.getElementById('reviews-sheet').classList.remove('open');}
+function renderReviewsSheet(){
+  const from=new Date(document.getElementById('date-from').value);
+  const to=new Date(document.getElementById('date-to').value);to.setHours(23,59,59);
+  const avatarColors=['#1d3461','#1a3328','#2a1a3a','#2a1a10','#1a2a3a','#321a1a'];
+  document.getElementById('sheet-review-rows').innerHTML=S.businesses.map((b,i)=>{
+    const count=S.reviews.filter(r=>r.user===S.user?.username&&r.bizId===b.id&&new Date(r.date)>=from&&new Date(r.date)<=to).length;
+    const initials=b.name.split(' ').slice(0,2).map(w=>w[0].toUpperCase()).join('');
+    return `<div class="review-row"><div class="review-row-avatar" style="background:${avatarColors[i%avatarColors.length]}">${initials}</div><div class="review-row-name">${b.name}</div><span class="review-row-count">${count} review${count!==1?'s':''}</span></div>`;
+  }).join('')||'<div style="color:#374151;text-align:center;padding:1rem">No businesses yet</div>';
+}
+
+function renderAdmin(){
+  if(!S.user||S.user.role!=='admin')return;
+  document.getElementById('admin-greet').textContent=S.user.name;
+  document.getElementById('admin-date').textContent=todayStr();
+  document.getElementById('adm-total').textContent=S.reviews.length;
+  document.getElementById('adm-today').textContent=S.reviews.filter(r=>r.date===todayKey()).length;
+  document.getElementById('adm-biz').textContent=S.businesses.length;
+  document.getElementById('adm-users').textContent=Object.values(ACCOUNTS).filter(a=>a.role==='user').length;
+  document.getElementById('admin-biz-list').innerHTML=S.businesses.map(b=>{
+    const today=S.reviews.filter(r=>r.bizId===b.id&&r.date===todayKey()).length;
+    const total=S.reviews.filter(r=>r.bizId===b.id).length;
+    const met=today>=b.goal;
+    return `<div class="admin-card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:14px;font-weight:600;color:#fff">${b.icon} ${b.name}</div><div style="font-size:12px;color:#4b5563;margin-top:2px">${b.cat} · Goal: ${b.goal}/day · Total: ${total}</div></div><div style="display:flex;align-items:center;gap:10px"><div style="text-align:right"><div style="font-size:18px;font-weight:700;color:${met?'#34d399':'#60a5fa'}">${today}</div><div style="font-size:12px;color:#4b5563">today</div></div><button class="btn-rm" onclick="confirmRemoveBiz(${b.id},'${b.name.replace(/'/g,"\\'")}')">Remove</button></div></div></div>`;
+  }).join('')||'<div style="color:#374151;padding:1rem">No businesses yet</div>';
+  const all=[...S.reviews].reverse();
+  document.getElementById('admin-proofs-list').innerHTML=all.length?all.map(r=>{
+    const b=S.businesses.find(x=>x.id===r.bizId);
+    return `<div class="admin-card" style="display:flex;align-items:center;gap:12px">${r.img?`<img src="${r.img}" style="width:54px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0"/>`:'<div style="width:54px;height:40px;border-radius:8px;background:#1e2535;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📱</div>'}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b?.icon||''} ${b?.name||'?'}</div><div style="font-size:12px;color:#4b5563">${r.user} · ${r.timeStr}</div></div><button class="btn-rm" onclick="confirmRemoveReview(${r.id})">Delete</button></div>`;
+  }).join(''):'<div style="color:#374151;padding:1rem;text-align:center">No submissions yet</div>';
+}
+
+function addBiz(){
+  const name=document.getElementById('f-name').value.trim();if(!name)return;
+  const btn=document.getElementById('add-biz-btn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div>Adding...';
+  setTimeout(()=>{
+    S.businesses.push({id:Date.now(),name,cat:document.getElementById('f-cat').value.trim()||'Business',goal:parseInt(document.getElementById('f-goal').value)||5,icon:document.getElementById('f-icon').value.trim()||'🏢',color:BIZ_COLORS[S.businesses.length%BIZ_COLORS.length]});
+    ['f-name','f-cat','f-goal','f-icon'].forEach(id=>document.getElementById(id).value='');
+    renderAdmin();toast('Business added! 🏢');
+    btn.disabled=false;btn.innerHTML='Add Business';
+  },500);
+}
+function confirmRemoveBiz(id,name){
+  openConfirm('🗑️','Remove Business?',`"${name}" and all its data will be permanently deleted.`,'Remove',()=>{S.businesses=S.businesses.filter(b=>b.id!==id);S.reviews=S.reviews.filter(r=>r.bizId!==id);renderAdmin();toast('Business removed.');});
+}
+function confirmRemoveReview(id){
+  openConfirm('🗑️','Delete Submission?','This proof photo will be permanently deleted.','Delete',()=>{S.reviews=S.reviews.filter(r=>r.id!==id);renderAdmin();renderHome();toast('Submission deleted.');});
+}
+function openConfirm(icon,title,msg,okLabel,cb){
+  S.confirmCb=cb;
+  document.getElementById('confirm-icon').textContent=icon;
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-msg').textContent=msg;
+  document.getElementById('confirm-ok-btn').textContent=okLabel;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');S.confirmCb=null;}
+document.getElementById('confirm-ok-btn').addEventListener('click',()=>{if(S.confirmCb)S.confirmCb();closeConfirm();});
+
+function openUpload(bizId){
+  S.pendingBiz=bizId;S.pendingImg=null;
+  const b=S.businesses.find(x=>x.id===bizId);
+  document.getElementById('upl-title').textContent=(b?.name||'Business')+' — Submit Proof';
+  document.getElementById('preview-img').style.display='none';
+  document.getElementById('preview-img').src='';
+  document.getElementById('file-err').style.display='none';
+  document.getElementById('submit-btn').disabled=true;
+  document.getElementById('submit-btn').innerHTML='Submit ✅';
+  document.getElementById('upload-cancel-btn').disabled=false;
+  document.getElementById('drop-zone').innerHTML='<div class="drop-icon">📱</div><div class="drop-text">Tap or drag photo here</div><div class="drop-hint">JPG or PNG · Max 20MB</div>';
+  document.getElementById('upload-modal').classList.add('open');
+}
+function closeUpload(){if(!document.getElementById('upload-cancel-btn').disabled)document.getElementById('upload-modal').classList.remove('open');}
+function handleFile(file){
+  if(!file)return;
+  document.getElementById('file-err').style.display='none';
+  if(file.size>MAX_FILE){document.getElementById('file-err').textContent='File too large. Max 20MB.';document.getElementById('file-err').style.display='block';document.getElementById('file-input').value='';return;}
+  if(!file.type.startsWith('image/')){document.getElementById('file-err').textContent='Please upload an image file.';document.getElementById('file-err').style.display='block';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    S.pendingImg=e.target.result;
+    document.getElementById('preview-img').src=e.target.result;
+    document.getElementById('preview-img').style.display='block';
+    document.getElementById('submit-btn').disabled=false;
+    document.getElementById('drop-zone').innerHTML=`<div style="font-size:13px;color:#34d399;padding:1rem">✅ Photo ready · ${Math.round(file.size/1024)}KB</div>`;
+  };
+  reader.readAsDataURL(file);
+}
+function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+function submitReview(){
+  document.getElementById('submit-btn').disabled=true;
+  document.getElementById('submit-btn').innerHTML='<div class="spinner"></div>Submitting...';
+  document.getElementById('upload-cancel-btn').disabled=true;
+  setTimeout(()=>{
+    const now=new Date();
+    S.reviews.push({id:Date.now(),bizId:S.pendingBiz,user:S.user.username,img:S.pendingImg,date:now.toDateString(),timeStr:now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});
+    document.getElementById('upload-modal').classList.remove('open');
+    document.getElementById('upload-cancel-btn').disabled=false;
+    renderHome();renderProofs();
+    toast('Review submitted! ⭐');
+  },800);
+}
+
+// ── AI REVIEW GENERATOR ──
+function toggleAiBox(bizId,bizName,bizCat){
+  const box=document.getElementById(`ai-box-${bizId}`);
+  const isOpen=box.classList.contains('open');
+  if(!isOpen){
+    box.classList.add('open');
+    const textEl=document.getElementById(`ai-text-${bizId}`);
+    if(textEl.dataset.generated!=='1'){
+      generateReview(bizId,bizName,bizCat);
+    }
+  } else {
+    box.classList.remove('open');
+  }
+}
+
+async function generateReview(bizId,bizName,bizCat){
+  const textEl=document.getElementById(`ai-text-${bizId}`);
+  const copyBtn=document.getElementById(`copy-btn-${bizId}`);
+  const regenBtn=document.getElementById(`regen-btn-${bizId}`);
+  if(!textEl)return;
+
+  textEl.textContent='Generating review...';
+  textEl.dataset.generated='0';
+  copyBtn.disabled=true;
+  regenBtn.disabled=true;
+  regenBtn.innerHTML='<div class="spinner spinner-p"></div>';
+
+  const prompts=[
+    `Write a short, natural-sounding 5-star Google review for a business called "${bizName}" in the ${bizCat} category. Make it sound like a real happy customer wrote it. Keep it 2-4 sentences, conversational, no hashtags, no emojis, no mention of "5 stars". Vary the style each time.`,
+    `Write a genuine-sounding positive Google review for "${bizName}" (${bizCat}). Sound like a real person, 2-3 sentences, casual tone, specific detail about good service. No hashtags or emojis.`,
+    `Generate a short authentic-sounding 5-star review for "${bizName}", a ${bizCat} business. Make it feel personal and real, 2-4 sentences. Different from generic reviews.`
+  ];
+  const prompt=prompts[Math.floor(Math.random()*prompts.length)];
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:200,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const text=data?.content?.[0]?.text?.trim();
+    if(text){
+      textEl.textContent=text;
+      textEl.dataset.generated='1';
+      copyBtn.disabled=false;
+      copyBtn.innerHTML='📋 Copy Review';
+      copyBtn.classList.remove('copied');
+    } else {
+      textEl.textContent='Could not generate review. Try again.';
+    }
+  } catch(e){
+    textEl.textContent='Network error. Please try again.';
+  }
+  regenBtn.disabled=false;
+  regenBtn.innerHTML='🔄 New';
+}
+
+function copyReview(bizId){
+  const textEl=document.getElementById(`ai-text-${bizId}`);
+  const copyBtn=document.getElementById(`copy-btn-${bizId}`);
+  if(!textEl||!textEl.textContent)return;
+  navigator.clipboard.writeText(textEl.textContent).then(()=>{
+    copyBtn.classList.add('copied');
+    copyBtn.innerHTML='✅ Copied!';
+    setTimeout(()=>{copyBtn.classList.remove('copied');copyBtn.innerHTML='📋 Copy Review';},2500);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=textEl.textContent;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    copyBtn.classList.add('copied');copyBtn.innerHTML='✅ Copied!';
+    setTimeout(()=>{copyBtn.classList.remove('copied');copyBtn.innerHTML='📋 Copy Review';},2500);
+  });
+}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2800);}
+document.getElementById('reviews-sheet').addEventListener('click',function(e){if(e.target===this)closeReviewsSheet();});
+document.getElementById('upload-modal').addEventListener('click',function(e){if(e.target===this)closeUpload();});
+document.getElementById('date-from').addEventListener('change',renderReviewsSheet);
+document.getElementById('date-to').addEventListener('change',renderReviewsSheet);
+</script>
+</body>
+</html>
